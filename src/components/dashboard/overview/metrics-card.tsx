@@ -8,7 +8,6 @@ import Divider from '@mui/material/Divider';
 import Avatar from '@mui/material/Avatar';
 
 export interface BudgetProps {
-  lg: number;
   dataType: string;
   currentData: number;
   value: string;
@@ -17,14 +16,14 @@ export interface BudgetProps {
   icon: any;
 }
 
-export function Metrics({ lg, dataType, currentData, value, min, max, icon }: BudgetProps): React.JSX.Element {
+export function Metrics({ dataType, currentData, value, min, max, icon }: BudgetProps): React.JSX.Element {
   return (
     <Card>
       <CardContent>
         <Grid container spacing={2}>
           <Grid lg={5}>
             <Typography color="text.secondary" variant="overline">
-              {dataType} actual
+              {dataType}
             </Typography>
             <h1 color="text.primary" style={{ margin: 0 }}>
               {currentData} {value}

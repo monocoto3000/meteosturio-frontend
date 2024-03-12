@@ -6,11 +6,11 @@ import dayjs from 'dayjs';
 import { config } from '@/config';
 import { LatestOrders } from '@/components/dashboard/overview/latest-orders';
 import { LatestProducts } from '@/components/dashboard/overview/latest-products';
-import { Sales } from '@/components/dashboard/overview/sales';
 
 //Componentes finalizados 
 import { Metrics } from '@/components/dashboard/overview/metrics-card';
 import { DownloadDocs } from '@/components/dashboard/overview/download-doc';
+import { MetricsCharts } from '@/components/dashboard/overview/chart';
 
 //Icons 
 import { Drop } from '@phosphor-icons/react/dist/ssr/Drop';
@@ -21,62 +21,74 @@ export const metadata = { title: `Overview | Dashboard | ${config.site.name}` } 
 
 export default function Page(): React.JSX.Element {
   return (
-    <Grid container spacing={3}>
-      <Grid lg={4} sm={12} xs={12}>
-        <Metrics 
-        lg={6} 
-        dataType="Temperatura" 
-        currentData={20} 
-        value="°C" 
-        max={35}
-        min={16}
-        icon={<Thermometer size={32} />}
-        />
+    <>
+      <Grid container spacing={2}>
+        <Grid container lg={4} spacing={2} direction={'column'}>
+          <Grid lg={12} xs={12}>
+            <Metrics
+              dataType="Temperatura"
+              currentData={20}
+              value="°C"
+              max={35}
+              min={16}
+              icon={<Thermometer size={32} />} />
+          </Grid>
+          <Grid lg={12} xs={12}>
+            <Metrics
+              dataType="Humedad"
+              currentData={70}
+              value="%"
+              max={85}
+              min={60}
+              icon={<Drop size={32} />} />
+          </Grid>
+          <Grid lg={12} xs={12}>
+            <Metrics
+              dataType="Radación"
+              currentData={20}
+              value="V"
+              max={35}
+              min={16}
+              icon={<Radioactive size={32} />} />
+          </Grid>
+          <Grid lg={12} xs={12}>
+            <DownloadDocs />
+          </Grid>
+        </Grid>
+        <Grid container lg={8} spacing={2}>
+          <Grid lg={12} xs={12}>
+            <MetricsCharts
+              chartSeries={[
+                { name: 'Temperatura', data: [18, 16, 5, 8, 3, 14, 14, 16, 17, 19, 18, 20] }
+              ]}
+              sx={{ height: '100%' }}
+              title="Temperatura"
+              metric="°C"
+              color="#FF953D" />
+          </Grid>
+          <Grid lg={12} xs={12}>
+            <MetricsCharts
+              chartSeries={[
+                { name: 'Humedad', data: [18, 16, 5, 8, 3, 14, 14, 16, 17, 19, 18, 20] }
+              ]}
+              sx={{ height: '100%' }}
+              title="Humedad"
+              metric="%"
+              color="#3D84FF" />
+          </Grid>
+          <Grid lg={12} xs={12}>
+            <MetricsCharts
+              chartSeries={[
+                { name: 'Radiación', data: [18, 16, 5, 8, 3, 14, 14, 16, 17, 19, 18, 20] }
+              ]}
+              sx={{ height: '100%' }}
+              title="Radiación"
+              metric="V"
+              color="#FF403D" />
+          </Grid>
+        </Grid>
       </Grid>
-      <Grid lg={4} sm={12} xs={12}>
-        <Metrics 
-        lg={6} 
-        dataType="Humedad" 
-        currentData={70} 
-        value="%" 
-        max={85}
-        min={60}
-        icon={<Drop size={32} />} 
-        />
-      </Grid>
-      <Grid lg={4} sm={12} xs={12}>
-        <Metrics 
-        lg={6} 
-        dataType="Radación" 
-        currentData={20} 
-        value="V" 
-        max={35}
-        min={16}
-        icon={<Radioactive size={32} />} 
-        />
-      </Grid>
-      {/* <Grid lg={3} sm={6} xs={12}>
-        <TotalCustomers diff={16} trend="down" sx={{ height: '100%' }} value="1.6k" />
-      </Grid>
-      <Grid lg={3} sm={6} xs={12}>
-        <TasksProgress sx={{ height: '100%' }} value={75.5} />
-      </Grid>
-      <Grid lg={3} sm={6} xs={12}>
-        <TotalProfit sx={{ height: '100%' }} value="$15k" />
-      </Grid> */}
-      <Grid lg={8} xs={12}>
-        <Sales
-          chartSeries={[
-            { name: 'This year', data: [18, 16, 5, 8, 3, 14, 14, 16, 17, 19, 18, 20] },
-            { name: 'Last year', data: [12, 11, 4, 6, 2, 9, 9, 10, 11, 12, 13, 13] },
-          ]}
-          sx={{ height: '100%' }}
-        />
-      </Grid>
-      <Grid lg={4} md={6} xs={12}>
-        <DownloadDocs/>
-      </Grid>
-      <Grid lg={4} md={6} xs={12}>
+      {/* <Grid lg={4} md={6} xs={12}>
         <LatestProducts
           products={[
             {
@@ -112,8 +124,8 @@ export default function Page(): React.JSX.Element {
           ]}
           sx={{ height: '100%' }}
         />
-      </Grid>
-      <Grid lg={8} md={12} xs={12}>
+      </Grid> */}
+      {/* <Grid lg={8} md={12} xs={12}>
         <LatestOrders
           orders={[
             {
@@ -161,7 +173,7 @@ export default function Page(): React.JSX.Element {
           ]}
           sx={{ height: '100%' }}
         />
-      </Grid>
-    </Grid>
+      </Grid> */}
+    </>
   );
 }
