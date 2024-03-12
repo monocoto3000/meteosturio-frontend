@@ -4,24 +4,58 @@ import Grid from '@mui/material/Unstable_Grid2';
 import dayjs from 'dayjs';
 
 import { config } from '@/config';
-import { Budget } from '@/components/dashboard/overview/budget';
 import { LatestOrders } from '@/components/dashboard/overview/latest-orders';
 import { LatestProducts } from '@/components/dashboard/overview/latest-products';
 import { Sales } from '@/components/dashboard/overview/sales';
-import { TasksProgress } from '@/components/dashboard/overview/tasks-progress';
-import { TotalCustomers } from '@/components/dashboard/overview/total-customers';
-import { TotalProfit } from '@/components/dashboard/overview/total-profit';
-import { Traffic } from '@/components/dashboard/overview/traffic';
+
+//Componentes finalizados 
+import { Metrics } from '@/components/dashboard/overview/metrics-card';
+import { DownloadDocs } from '@/components/dashboard/overview/download-doc';
+
+//Icons 
+import { Drop } from '@phosphor-icons/react/dist/ssr/Drop';
+import { Thermometer } from '@phosphor-icons/react/dist/ssr/Thermometer';
+import { Radioactive } from '@phosphor-icons/react/dist/ssr/Radioactive';
 
 export const metadata = { title: `Overview | Dashboard | ${config.site.name}` } satisfies Metadata;
 
 export default function Page(): React.JSX.Element {
   return (
     <Grid container spacing={3}>
-      <Grid lg={3} sm={6} xs={12}>
-        <Budget diff={12} trend="up" sx={{ height: '100%' }} value="$24k" />
+      <Grid lg={4} sm={12} xs={12}>
+        <Metrics 
+        lg={6} 
+        dataType="Temperatura" 
+        currentData={20} 
+        value="°C" 
+        max={35}
+        min={16}
+        icon={<Thermometer size={32} />}
+        />
       </Grid>
-      <Grid lg={3} sm={6} xs={12}>
+      <Grid lg={4} sm={12} xs={12}>
+        <Metrics 
+        lg={6} 
+        dataType="Humedad" 
+        currentData={70} 
+        value="%" 
+        max={85}
+        min={60}
+        icon={<Drop size={32} />} 
+        />
+      </Grid>
+      <Grid lg={4} sm={12} xs={12}>
+        <Metrics 
+        lg={6} 
+        dataType="Radación" 
+        currentData={20} 
+        value="V" 
+        max={35}
+        min={16}
+        icon={<Radioactive size={32} />} 
+        />
+      </Grid>
+      {/* <Grid lg={3} sm={6} xs={12}>
         <TotalCustomers diff={16} trend="down" sx={{ height: '100%' }} value="1.6k" />
       </Grid>
       <Grid lg={3} sm={6} xs={12}>
@@ -29,7 +63,7 @@ export default function Page(): React.JSX.Element {
       </Grid>
       <Grid lg={3} sm={6} xs={12}>
         <TotalProfit sx={{ height: '100%' }} value="$15k" />
-      </Grid>
+      </Grid> */}
       <Grid lg={8} xs={12}>
         <Sales
           chartSeries={[
@@ -40,7 +74,7 @@ export default function Page(): React.JSX.Element {
         />
       </Grid>
       <Grid lg={4} md={6} xs={12}>
-        <Traffic chartSeries={[63, 15, 22]} labels={['Desktop', 'Tablet', 'Phone']} sx={{ height: '100%' }} />
+        <DownloadDocs/>
       </Grid>
       <Grid lg={4} md={6} xs={12}>
         <LatestProducts
