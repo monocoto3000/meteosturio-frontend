@@ -4,8 +4,8 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import { config } from '@/config';
-import { CustomersTable } from '@/components/dashboard/solicitudes/customers-table';
-import type { Customer } from '@/components/dashboard/solicitudes/customers-table';
+import { CustomersTable } from '@/components/dashboard/customer/customers-table';
+import type { Customer } from '@/components/dashboard/customer/customers-table';
 
 export const metadata = { title: `Customers | Dashboard | ${config.site.name}` } satisfies Metadata;
 

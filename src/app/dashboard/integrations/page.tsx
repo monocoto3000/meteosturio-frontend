@@ -4,7 +4,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
-import { Station } from '@/components/dashboard/menu-principal/station';
+import { Station } from '@/components/dashboard/overview/station';
 
 export default function Page(): React.JSX.Element {
   const stations = [{

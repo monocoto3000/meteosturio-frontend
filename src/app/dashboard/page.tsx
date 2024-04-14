@@ -3,9 +3,9 @@ import * as React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import { Metrics } from '@/components/dashboard/menu-principal/metrics-card';
-import { DownloadDocs } from '@/components/dashboard/menu-principal/download-doc';
-import { MetricsCharts } from '@/components/dashboard/menu-principal/chart';
+import { Metrics } from '@/components/dashboard/overview/metrics-card';
+import { DownloadDocs } from '@/components/dashboard/overview/download-doc';
+import { MetricsCharts } from '@/components/dashboard/overview/chart';
 
 import { Drop } from '@phosphor-icons/react/dist/ssr/Drop';
 import { Thermometer } from '@phosphor-icons/react/dist/ssr/Thermometer';
