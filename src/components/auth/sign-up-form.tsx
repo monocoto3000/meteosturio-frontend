@@ -23,8 +23,9 @@ import { authClient } from '@/lib/auth/client';
 import { useUser } from '@/hooks/use-user';
 
 const schema = zod.object({
-  firstName: zod.string().min(1, { message: 'First name is required' }),
-  lastName: zod.string().min(1, { message: 'Last name is required' }),
+  firstName: zod.string().min(1, { message: 'Nombre es requerido' }),
+  lastName: zod.string().min(1, { message: 'Apellido paterno es requerido' }),
+  secondLastName:  zod.string().min(1, { message: 'Apellido materno es requerido' }),
   email: zod.string().min(1, { message: 'Email is required' }).email(),
   password: zod.string().min(6, { message: 'Password should be at least 6 characters' }),
   terms: zod.boolean().refine((value) => value, 'You must accept the terms and conditions'),
@@ -73,11 +74,11 @@ export function SignUpForm(): React.JSX.Element {
   return (
     <Stack spacing={3}>
       <Stack spacing={1}>
-        <Typography variant="h4">Sign up</Typography>
+        <Typography variant="h4">Registrarse</Typography>
         <Typography color="text.secondary" variant="body2">
-          Already have an account?{' '}
+          Ya tienes una cuenta?{' '}
           <Link component={RouterLink} href={paths.auth.signIn} underline="hover" variant="subtitle2">
-            Sign in
+            Inicia sesión
           </Link>
         </Typography>
       </Stack>
@@ -88,19 +89,30 @@ export function SignUpForm(): React.JSX.Element {
             name="firstName"
             render={({ field }) => (
               <FormControl error={Boolean(errors.firstName)}>
-                <InputLabel>First name</InputLabel>
-                <OutlinedInput {...field} label="First name" />
+                <InputLabel>Nombre</InputLabel>
+                <OutlinedInput {...field} label="Nombre" />
                 {errors.firstName ? <FormHelperText>{errors.firstName.message}</FormHelperText> : null}
               </FormControl>
             )}
           />
           <Controller
             control={control}
-            name="lastName"
+            name="secondLastName"
+            render={({ field }) => (
+              <FormControl error={Boolean(errors.secondLastName)}>
+                <InputLabel>Apellido paterno</InputLabel>
+                <OutlinedInput {...field} label="Apellido paterno" />
+                {errors.secondLastName ? <FormHelperText>{errors.secondLastName.message}</FormHelperText> : null}
+              </FormControl>
+            )}
+          />
+          <Controller
+            control={control}
+            name="firstName"
             render={({ field }) => (
               <FormControl error={Boolean(errors.firstName)}>
-                <InputLabel>Last name</InputLabel>
-                <OutlinedInput {...field} label="Last name" />
+                <InputLabel>Apellido materno</InputLabel>
+                <OutlinedInput {...field} label="Apellido materno" />
                 {errors.firstName ? <FormHelperText>{errors.firstName.message}</FormHelperText> : null}
               </FormControl>
             )}
@@ -109,8 +121,19 @@ export function SignUpForm(): React.JSX.Element {
             control={control}
             name="email"
             render={({ field }) => (
+              <FormControl error={Boolean(errors.firstName)}>
+                <InputLabel>Correo</InputLabel>
+                <OutlinedInput {...field} label="Last name" />
+                {errors.firstName ? <FormHelperText>{errors.firstName.message}</FormHelperText> : null}
+              </FormControl>
+            )}
+          />
+          <Controller
+            control={control}
+            name="password"
+            render={({ field }) => (
               <FormControl error={Boolean(errors.email)}>
-                <InputLabel>Email address</InputLabel>
+                <InputLabel>Contraseña</InputLabel>
                 <OutlinedInput {...field} label="Email address" type="email" />
                 {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
               </FormControl>
@@ -121,7 +144,7 @@ export function SignUpForm(): React.JSX.Element {
             name="password"
             render={({ field }) => (
               <FormControl error={Boolean(errors.password)}>
-                <InputLabel>Password</InputLabel>
+                <InputLabel>Tipo de cuenta</InputLabel>
                 <OutlinedInput {...field} label="Password" type="password" />
                 {errors.password ? <FormHelperText>{errors.password.message}</FormHelperText> : null}
               </FormControl>
