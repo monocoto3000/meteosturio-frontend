@@ -12,13 +12,15 @@ const user = {
   id: 'USR-000',
   avatar: '/assets/avatar.png',
   firstName: 'Sofia',
-  lastName: 'Rivers',
   email: 'sofia@devias.io',
 } satisfies User;
 
 export interface SignUpParams {
-  firstName: string;
-  lastName: string;
+  firstName:string;
+  first_last_name:string;
+  second_last_name:string;
+  type_id:string;
+  birthdate:string;
   email: string;
   password: string;
 }
