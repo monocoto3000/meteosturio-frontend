@@ -1,56 +1,130 @@
 "use client"
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { Metrics } from '@/components/dashboard/overview/metrics-card';
 import { DownloadDocs } from '@/components/dashboard/overview/download-doc';
 import { MetricsCharts } from '@/components/dashboard/overview/chart';
-
+import axios from 'axios';
+import { io } from 'socket.io-client';
 import { Drop } from '@phosphor-icons/react/dist/ssr/Drop';
 import { Thermometer } from '@phosphor-icons/react/dist/ssr/Thermometer';
 import { Radioactive } from '@phosphor-icons/react/dist/ssr/Radioactive';
 
-const data = [
-  {
-    stationName: "Monica",
-    temperature: { currentData: 20, max: 35, min: 15 },
-    humidity: { currentData: 70, max: 79, min: 65 },
-    radiation: { currentData: 23, max: 42, min: 15 },
-    chartsData: {
-      temperature: [18, 16, 5, 8, 3, 14, 14, 16, 17, 19, 18, 20],
-      humidity: [18, 16, 5, 8, 3, 14, 22, 16, 17, 19, 18, 20],
-      radiation: [18, 16, 5, 8, 3, 14, 14, 16, 17, 19, 18, 20]
-    }
-  },
-  {
-    stationName: "Cesar",
-    temperature: { currentData: 32, max: 37, min: 13 },
-    humidity: { currentData: 74, max: 87, min: 33 },
-    radiation: { currentData: 34, max: 62, min: 12 },
-    chartsData: {
-      temperature: [22, 24, 18, 19, 20, 22, 25, 28, 29, 31, 32, 33],
-      humidity: [62, 64, 63, 65, 68, 70, 72, 74, 76, 78, 80, 82],
-      radiation: [28, 30, 32, 33, 34, 35, 36, 38, 40, 42, 44, 45]
-    }
-  }
-];
-
 export default function Page(): React.JSX.Element {
+
+  const baseURL_max = 'http://localhost:3001/data/max';
+  const baseURL_min = 'http://localhost:3001/data/min';
+  const baseURL_data = 'http://localhost:3001/data/station';
+
+  const [minData, setMinData] = useState(null);
+  const [maxData, setMaxData] = useState(null);
+  const [rtData, setRtData] = useState(null);
+  const [chartData, setChartData] = useState([]);
+  const [selectedStation, setSelectedStation] = useState('');
+  const [stationOptions, setStationOptions] = useState([]);
+
+  const token = localStorage.getItem('token')
+
+  useEffect(() => {
+    axios.post(baseURL_max, { "stationId": selectedStation })
+      .then(response => {
+        if (response != null) {
+          console.log("max", response.data)
+          setMaxData(response.data);
+        }
+      })
+      .catch(error => {
+        console.log(error)
+      });
+  }, [selectedStation]);
+
+  useEffect(() => {
+    axios.post(baseURL_min, { "stationId": selectedStation })
+      .then(response => {
+        if (response != null) {
+          console.log("min", response.data)
+          setMinData(response.data);
+        }
+      })
+      .catch(error => {
+        console.log(error)
+      });
+  }, [selectedStation]);
+
+  const socket = io('http://localhost:4000');
+
+  useEffect(() => {
+    socket.on('rtdata', (data) => {
+      console.log("rtdata", data)
+      if (data != null) {
+        setRtData(data);
+        updateLocalData(data);
+      }
+    });
+
+    socket.on('averages', (data) => {
+      axios.post(baseURL_data, { "stationId": selectedStation })
+        .then(response => {
+          if (response != null) {
+            console.log("data from API", response.data)
+            setChartData(response.data);
+          }
+        })
+        .catch(error => {
+          console.log(error)
+        });
+    });
+
+  }, [selectedStation]);
+
+  const updateLocalData = (newData) => {
+    setChartData(prevChartData => [...prevChartData, newData]);
+  };
+
   const [selectedTab, setSelectedTab] = React.useState(0);
+  const [showDashboard, setShowDashboard] = useState(false);
 
   const handleChangeTab = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
   };
 
+  const handleStationChange = (event) => {
+    setSelectedStation(event.target.value);
+  };
+
+  const handleAccept = () => {
+    setShowDashboard(selectedStation !== null);
+  };
+
+
+  // Axios de get estaciones 
+  useEffect(() => {
+    const mockStationOptions = [
+      { value: '1', label: 'Estación 1' },
+      { value: '2', label: 'Estación 2' },
+      { value: '3', label: 'Estación 3' },
+      { value: '4', label: 'Estación 4' }
+    ];
+    setStationOptions(mockStationOptions);
+  }, []);
 
   return (
     <Grid container spacing={2}>
       <Grid container xs={12}>
+        <select value={selectedStation} onChange={handleStationChange}>
+          <option value="">Seleccione una estación</option>
+          {stationOptions.map((option, index) => (
+            <option key={index} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </Grid>
+      <Grid container xs={12}>
         <Tabs value={selectedTab} onChange={handleChangeTab} indicatorColor="secondary">
-          {data.map((station, index) => (
-            <Tab key={index} label={station.stationName} />
+          {chartData.map((station, index) => (
+            <Tab key={index} label={station.stationId} />
           ))}
         </Tabs>
       </Grid>
@@ -58,53 +132,39 @@ export default function Page(): React.JSX.Element {
         <Grid lg={12} xs={12}>
           <Metrics
             dataType="Temperatura"
-            currentData={data[selectedTab].temperature.currentData}
+            currentData={rtData?.temperature}
             value="°C"
-            max={data[selectedTab].temperature.max}
-            min={data[selectedTab].temperature.min}
+            max={maxData?.temperature}
+            min={minData?.temperature}
             icon={<Thermometer size={32} />}
           />
         </Grid>
         <Grid lg={12} xs={12}>
           <Metrics
             dataType="Humedad"
-            currentData={data[selectedTab].humidity.currentData}
+            currentData={rtData?.humidity}
             value="%"
-            max={data[selectedTab].humidity.max}
-            min={data[selectedTab].humidity.min}
+            max={maxData?.humidity}
+            min={minData?.humidity}
             icon={<Drop size={32} />}
           />
         </Grid>
         <Grid lg={12} xs={12}>
           <Metrics
             dataType="Radación"
-            currentData={data[selectedTab].radiation.currentData}
+            currentData={rtData?.radiation}
             value="V"
-            max={data[selectedTab].radiation.max}
-            min={data[selectedTab].radiation.min}
+            max={maxData?.radiation}
+            min={minData?.radiation}
             icon={<Radioactive size={32} />}
           />
-        </Grid>
-        <Grid lg={12} xs={12}>
-          <DownloadDocs />
         </Grid>
       </Grid>
       <Grid container lg={8} spacing={2}>
         <Grid lg={12} xs={12}>
           <MetricsCharts
             chartSeries={[
-              { name: 'Humedad', data: data[selectedTab].chartsData.temperature }
-            ]}
-            sx={{ height: '100%' }}
-            title="Temperatura"
-            metric="°C"
-            color="#FF953D"
-          />
-        </Grid>
-        <Grid lg={12} xs={12}>
-          <MetricsCharts
-            chartSeries={[
-              { name: 'Humedad', data: data[selectedTab].chartsData.humidity }
+              { name: 'Humedad', data: chartData[selectedTab]?.chartsData?.humidity }
             ]}
             sx={{ height: '100%' }}
             title="Humedad"
@@ -115,7 +175,7 @@ export default function Page(): React.JSX.Element {
         <Grid lg={12} xs={12}>
           <MetricsCharts
             chartSeries={[
-              { name: 'Radiación', data: data[selectedTab].chartsData.radiation }
+              { name: 'Radiación', data: chartData[selectedTab]?.chartsData?.radiation }
             ]}
             sx={{ height: '100%' }}
             title="Radiación"
@@ -123,6 +183,9 @@ export default function Page(): React.JSX.Element {
             color="#FF403D"
           />
         </Grid>
+      </Grid>
+      <Grid lg={12} xs={12}>
+        <DownloadDocs />
       </Grid>
     </Grid>
   );
