@@ -1,195 +1,192 @@
 "use client"
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Autocomplete from '@mui/material/Autocomplete';
-import Button from '@mui/material/Button';
-import { Card, CardContent, Typography, TextField } from '@mui/material';
 import { Metrics } from '@/components/dashboard/overview/metrics-card';
 import { DownloadDocs } from '@/components/dashboard/overview/download-doc';
 import { MetricsCharts } from '@/components/dashboard/overview/chart';
-import { useEffect } from 'react';
 import axios from 'axios';
-
+import { io } from 'socket.io-client';
 import { Drop } from '@phosphor-icons/react/dist/ssr/Drop';
 import { Thermometer } from '@phosphor-icons/react/dist/ssr/Thermometer';
 import { Radioactive } from '@phosphor-icons/react/dist/ssr/Radioactive';
-import { io } from 'socket.io-client';
-
-
-const data = [
-  {
-    stationId: "Monica",
-    temperature: { currentData: 20, max: 35, min: 15 },
-    humidity: { currentData: 70, max: 79, min: 65 },
-    radiation: { currentData: 23, max: 42, min: 15 },
-    chartsData: {
-      temperature: [18, 16, 5, 8, 3, 14, 14, 16, 17, 19, 18, 20],
-      humidity: [18, 16, 5, 8, 3, 14, 22, 16, 17, 19, 18, 20],
-      radiation: [18, 16, 5, 8, 3, 14, 14, 16, 17, 19, 18, 20]
-    }
-  }
-];
 
 export default function Page(): React.JSX.Element {
 
-  const baseURL = 'http://localhost:8080/paciente/getAll';
-  const [data, setData] = useState([]);
-  const [rtdata, setRtdata] = useState(null);
-  const [average, setAverage] = useState(null);
+  const baseURL_max = 'http://localhost:3001/data/max';
+  const baseURL_min = 'http://localhost:3001/data/min';
+  const baseURL_data = 'http://localhost:3001/data/station';
 
+  const [minData, setMinData] = useState(null);
+  const [maxData, setMaxData] = useState(null);
+  const [rtData, setRtData] = useState(null);
+  const [chartData, setChartData] = useState([]);
+  const [selectedStation, setSelectedStation] = useState('');
+  const [stationOptions, setStationOptions] = useState([]);
 
   const token = localStorage.getItem('token')
 
   useEffect(() => {
-    axios.post(baseURL, {
-      params: {
-        "stationId": "1"
-      }
-    })
+    axios.post(baseURL_max, { "stationId": selectedStation })
       .then(response => {
         if (response != null) {
-          setData(response?.data);
+          console.log("max", response.data)
+          setMaxData(response.data);
         }
       })
       .catch(error => {
         console.log(error)
       });
-  }, []);
+  }, [selectedStation]);
+
+  useEffect(() => {
+    axios.post(baseURL_min, { "stationId": selectedStation })
+      .then(response => {
+        if (response != null) {
+          console.log("min", response.data)
+          setMinData(response.data);
+        }
+      })
+      .catch(error => {
+        console.log(error)
+      });
+  }, [selectedStation]);
 
   const socket = io('http://localhost:4000');
 
-  socket.on('rtdata', (data: any) => {
-    console.log(data)
-    setRtdata(data)
-  });
+  useEffect(() => {
+    socket.on('rtdata', (data) => {
+      console.log("rtdata", data)
+      if (data != null) {
+        setRtData(data);
+        updateLocalData(data);
+      }
+    });
 
-  socket.on('averages', (data: any) => {
-    console.log(data)
-    setAverage(data)
-  });
+    socket.on('averages', (data) => {
+      axios.post(baseURL_data, { "stationId": selectedStation })
+        .then(response => {
+          if (response != null) {
+            console.log("data from API", response.data)
+            setChartData(response.data);
+          }
+        })
+        .catch(error => {
+          console.log(error)
+        });
+    });
+
+  }, [selectedStation]);
+
+  const updateLocalData = (newData) => {
+    setChartData(prevChartData => [...prevChartData, newData]);
+  };
 
   const [selectedTab, setSelectedTab] = React.useState(0);
-  const [selectedStation, setSelectedStation] = useState(null);
   const [showDashboard, setShowDashboard] = useState(false);
 
   const handleChangeTab = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
   };
 
-  const handleAccept = () => {
-    if (selectedStation !== null) {
-      setShowDashboard(true);
-    }
+  const handleStationChange = (event) => {
+    setSelectedStation(event.target.value);
   };
+
+  const handleAccept = () => {
+    setShowDashboard(selectedStation !== null);
+  };
+
+
+  // Axios de get estaciones 
+  useEffect(() => {
+    const mockStationOptions = [
+      { value: '1', label: 'Estación 1' },
+      { value: '2', label: 'Estación 2' },
+      { value: '3', label: 'Estación 3' },
+      { value: '4', label: 'Estación 4' }
+    ];
+    setStationOptions(mockStationOptions);
+  }, []);
 
   return (
     <Grid container spacing={2}>
-      {!showDashboard && (
-        <Grid container lg={12} justifyContent="center">
-          <Grid item lg={6} xs={12}>
-            <Card>
-              <CardContent>
-                <Typography variant="h5" component="h2" style={{ margin: 10 }}>
-                  Seleccione una estación
-                </Typography>
-                <Autocomplete
-                  style={{ margin: 10 }}
-                  options={data.map(station => station.stationId)}
-                  onChange={(event, value) => setSelectedStation(value)}
-                  renderInput={(params) => <TextField {...params} label="Estación" />}
-                />
-                <Button variant="contained" onClick={handleAccept} fullWidth>Aceptar</Button>
-              </CardContent>
-            </Card>
-          </Grid>
+      <Grid container xs={12}>
+        <select value={selectedStation} onChange={handleStationChange}>
+          <option value="">Seleccione una estación</option>
+          {stationOptions.map((option, index) => (
+            <option key={index} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </Grid>
+      <Grid container xs={12}>
+        <Tabs value={selectedTab} onChange={handleChangeTab} indicatorColor="secondary">
+          {chartData.map((station, index) => (
+            <Tab key={index} label={station.stationId} />
+          ))}
+        </Tabs>
+      </Grid>
+      <Grid container lg={4} spacing={2} direction={'column'}>
+        <Grid lg={12} xs={12}>
+          <Metrics
+            dataType="Temperatura"
+            currentData={rtData?.temperature}
+            value="°C"
+            max={maxData?.temperature}
+            min={minData?.temperature}
+            icon={<Thermometer size={32} />}
+          />
         </Grid>
-      )}
-      {showDashboard && (
-        <>
-          <Grid container spacing={2}>
-            <Grid container xs={12}>
-              <Tabs value={selectedTab} onChange={handleChangeTab} indicatorColor="secondary">
-                {data.map((station, index) => (
-                  <Tab key={index} label={station.stationId} />
-                ))}
-              </Tabs>
-            </Grid>
-            <Grid container lg={4} spacing={2} direction={'column'}>
-              <Grid lg={12} xs={12}>
-                <Metrics
-                  dataType="Temperatura"
-                  currentData={data[selectedTab].temperature.currentData}
-                  value="°C"
-                  max={data[selectedTab].temperature.max}
-                  min={data[selectedTab].temperature.min}
-                  icon={<Thermometer size={32} />}
-                />
-              </Grid>
-              <Grid lg={12} xs={12}>
-                <Metrics
-                  dataType="Humedad"
-                  currentData={data[selectedTab].humidity.currentData}
-                  value="%"
-                  max={data[selectedTab].humidity.max}
-                  min={data[selectedTab].humidity.min}
-                  icon={<Drop size={32} />}
-                />
-              </Grid>
-              <Grid lg={12} xs={12}>
-                <Metrics
-                  dataType="Radación"
-                  currentData={data[selectedTab].radiation.currentData}
-                  value="V"
-                  max={data[selectedTab].radiation.max}
-                  min={data[selectedTab].radiation.min}
-                  icon={<Radioactive size={32} />}
-                />
-              </Grid>
-              <Grid lg={12} xs={12}>
-                <DownloadDocs />
-              </Grid>
-            </Grid>
-            <Grid container lg={8} spacing={2}>
-              <Grid lg={12} xs={12}>
-                <MetricsCharts
-                  chartSeries={[
-                    { name: 'Humedad', data: data[selectedTab].chartsData.temperature }
-                  ]}
-                  sx={{ height: '100%' }}
-                  title="Temperatura"
-                  metric="°C"
-                  color="#FF953D"
-                />
-              </Grid>
-              <Grid lg={12} xs={12}>
-                <MetricsCharts
-                  chartSeries={[
-                    { name: 'Humedad', data: data[selectedTab].chartsData.humidity }
-                  ]}
-                  sx={{ height: '100%' }}
-                  title="Humedad"
-                  metric="%"
-                  color="#3D84FF"
-                />
-              </Grid>
-              <Grid lg={12} xs={12}>
-                <MetricsCharts
-                  chartSeries={[
-                    { name: 'Radiación', data: data[selectedTab].chartsData.radiation }
-                  ]}
-                  sx={{ height: '100%' }}
-                  title="Radiación"
-                  metric="V"
-                  color="#FF403D"
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </>
-      )}
+        <Grid lg={12} xs={12}>
+          <Metrics
+            dataType="Humedad"
+            currentData={rtData?.humidity}
+            value="%"
+            max={maxData?.humidity}
+            min={minData?.humidity}
+            icon={<Drop size={32} />}
+          />
+        </Grid>
+        <Grid lg={12} xs={12}>
+          <Metrics
+            dataType="Radación"
+            currentData={rtData?.radiation}
+            value="V"
+            max={maxData?.radiation}
+            min={minData?.radiation}
+            icon={<Radioactive size={32} />}
+          />
+        </Grid>
+      </Grid>
+      <Grid container lg={8} spacing={2}>
+        <Grid lg={12} xs={12}>
+          <MetricsCharts
+            chartSeries={[
+              { name: 'Humedad', data: chartData[selectedTab]?.chartsData?.humidity }
+            ]}
+            sx={{ height: '100%' }}
+            title="Humedad"
+            metric="%"
+            color="#3D84FF"
+          />
+        </Grid>
+        <Grid lg={12} xs={12}>
+          <MetricsCharts
+            chartSeries={[
+              { name: 'Radiación', data: chartData[selectedTab]?.chartsData?.radiation }
+            ]}
+            sx={{ height: '100%' }}
+            title="Radiación"
+            metric="V"
+            color="#FF403D"
+          />
+        </Grid>
+      </Grid>
+      <Grid lg={12} xs={12}>
+        <DownloadDocs />
+      </Grid>
     </Grid>
   );
 }
