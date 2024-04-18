@@ -15,7 +15,7 @@ interface DataItem {
   radiation: number;
 }
 
-export function DownloadDocs(): React.JSX.Element {
+export function DownloadDocs({ station }: { station: string }): React.JSX.Element {
   const [data, setData] = useState<DataItem[]>([]);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -26,7 +26,7 @@ export function DownloadDocs(): React.JSX.Element {
   const handleSearch = async () => {
     try {
       const response = await axios.post('http://localhost:3001/data/date', {
-        stationId: "4",
+        stationId: station,
         startDate: startDate,
         endDate: endDate
       });
