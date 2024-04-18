@@ -195,7 +195,9 @@ export function SignUpForm(): React.JSX.Element {
                     <Button disabled={isPending}  variant="contained" type='submit' >
                       Registrarse
                     </Button>
-
+                    <Button onClick={SetIsRegistred}>
+                      hole
+                    </Button>
 
                     {isRegistered && 
                      <Autocomplete
