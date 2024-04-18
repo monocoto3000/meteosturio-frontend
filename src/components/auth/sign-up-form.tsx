@@ -16,7 +16,7 @@ import { Autocomplete } from '@mui/material';
 
 export function SignUpForm(): React.JSX.Element {
   const userType = ['EMPRESARIAL', 'INDIVIDUAL'];
-  const baseUrl = "URL";
+  const baseUrl = "http://54.205.207.55/users/";
   return (
     <>
       <Formik
@@ -27,11 +27,12 @@ export function SignUpForm(): React.JSX.Element {
           first_last_name: "",
           second_last_name: "",
           birthdate: "",
-          type_id: ""
+          type_id: 1
         }}
         onSubmit={async (values) => {
           try {
-            console.log(values);
+            console.log(values)
+           
             axios.post(baseUrl, {
               name: values.name,
               email: values.email,
@@ -41,11 +42,12 @@ export function SignUpForm(): React.JSX.Element {
               birthdate: values.birthdate,
               type_id: values.type_id
             }).then((response) => {
+                
               if (response.data !== "") {
                 alert("Usuario creado exitosamente");
-                window.location.href = "http://localhost:3000/dashboard";
+                window.location.href="/sign-in"                  
               } else {
-                console.log("El Usuario fue creado :)");
+                console.log("No se Creo el Usuairo");
               }
             });
           } catch (error) {
@@ -85,37 +87,6 @@ export function SignUpForm(): React.JSX.Element {
                     <div className="containerImgLogin"></div>
                   </div>
 
-<<<<<<< HEAD
-                    {errors.root ? <Alert color="error">{errors.root.message}</Alert> : null}
-                    <Button disabled={isPending}  variant="contained" type='submit' >
-                      Registrarse
-                    </Button>
-                    <Button onClick={SetIsRegistred}>
-                      hole
-                    </Button>
-
-                    {isRegistered && 
-                     <Autocomplete
-                     disablePortal
-                     id="combo-box-demo"
-                     options={top100Films}
-                     sx={{ width: "100%" }}
-                     renderInput={(params) => <TextField {...params} label="Movie" />}
-                   />
-                    }
-                  </Stack>
-                </form>
-              </Stack>
-            </Box>
-          </Box>
-        </Box>
-      </Grid>
-
-      <Grid item xs={12} lg={6}>
-        <img src="/assets/auth-widgets.png" alt="img" width={'100%'} height={'100%'} />
-      </Grid>
-    </Grid>
-=======
                   <div className="containerFormRegister">
                     <div>
                       <Typography
@@ -212,21 +183,7 @@ export function SignUpForm(): React.JSX.Element {
                           required
                         />
                       </Grid>
-                      <Grid item xs={12} lg={12}>
-                        <Autocomplete
-                          disablePortal
-                          id="estadoCivil"
-                          options={userType}
-                          getOptionLabel={(option) => (typeof option === 'string' || option instanceof String ? option : '')}
-                          required
-                          onChange={(e, value) => {
-                            console.log(value);
-                            setFieldValue('type_id', value !== null ? value : values.type_id);
-                          }}
-                          sx={{ width: '100%' }}
-                          renderInput={(params) => <TextField {...params} label="Estado Civil" />}
-                        />
-                      </Grid>
+                     
                     </Grid>
                     <div
                       style={{
@@ -250,7 +207,6 @@ export function SignUpForm(): React.JSX.Element {
         )}
       </Formik>
     </>
->>>>>>> 682ba7cedcfd42811a17fd9d1984663244e96761
   );
 
 }

@@ -1,5 +1,9 @@
 'use client';
 
+import { error } from 'console';
+
+import axios from 'axios';
+
 import type { User } from '@/types/user';
 
 function generateToken(): string {
@@ -16,11 +20,11 @@ const user = {
 } satisfies User;
 
 export interface SignUpParams {
-  firstName:string;
-  first_last_name:string;
-  second_last_name:string;
-  accountType:string;
-  birthdate:string;
+  firstName: string;
+  first_last_name: string;
+  second_last_name: string;
+  accountType: string;
+  birthdate: string;
   email: string;
   password: string;
 }
@@ -55,16 +59,22 @@ class AuthClient {
 
   async signInWithPassword(params: SignInWithPasswordParams): Promise<{ error?: string }> {
     const { email, password } = params;
+    const baseUrl = 'http://54.205.207.55/users/login';
 
     // Make API request
 
-    // We do not handle the API, so we'll check if the credentials match with the hardcoded ones.
-    if (email !== 'sofia@devias.io' || password !== 'Secret1') {
-      return { error: 'Invalid credentials' };
-    }
+    try {
+      await axios.post(baseUrl, { email: email, password: password }).then((response) => {
+        if (response.data.token !== 'Contraseña O Usuario Incorrectas') {
+          const token = response.data.token;
+          localStorage.setItem('custom-auth-token', token);
+        } else {
+          console.log('Usuario o Contraseña incorrecta');
+        }
+      });
+    } catch (error) {}
 
-    const token = generateToken();
-    localStorage.setItem('custom-auth-token', token);
+    // We do not handle the API, so we'll check if the credentials match with the hardcoded ones.
 
     return {};
   }
