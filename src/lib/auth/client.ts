@@ -19,7 +19,7 @@ export interface SignUpParams {
   firstName:string;
   first_last_name:string;
   second_last_name:string;
-  type_id:string;
+  accountType:string;
   birthdate:string;
   email: string;
   password: string;
