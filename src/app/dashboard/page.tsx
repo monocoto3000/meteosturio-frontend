@@ -17,9 +17,9 @@ import { DownloadDocs } from '@/components/dashboard/overview/download-doc';
 import { Metrics } from '@/components/dashboard/overview/metrics-card';
 
 export default function Page(): React.JSX.Element {
-  const baseURL_max = 'http://localhost:3001/data/max';
-  const baseURL_min = 'http://localhost:3001/data/min';
-  const baseURL_data = 'http://localhost:3001/data/station';
+  const baseURL_max = 'http://3.221.32.128/data/max';
+  const baseURL_min = 'http://3.221.32.128/data/min';
+  const baseURL_data = 'http://3.221.32.128/data/station';
   const baseURL_stations = ' http://54.205.207.55/stations/';
 
   const [minData, setMinData] = useState(null);
@@ -59,7 +59,7 @@ export default function Page(): React.JSX.Element {
       });
   }, [selectedStation]);
 
-  const socket = io('http://localhost:4000');
+  const socket = io('http://3.212.10.41');
 
   useEffect(() => {
     socket.on('rtdata', (data) => {
@@ -113,12 +113,13 @@ export default function Page(): React.JSX.Element {
         .get(baseURL_stations)
         .then((response) => {
           if (response.data) {
+            console.log(response.data)
             let data = response.data.data;
              const stationsData = data.map((station) => ({
-              value: station.id_station,
+              value: station.id_station.toString(),
               label: station.name,
             }));
-            console.log(data);
+            console.log("data", data);
             console.log(stationOptions)
             setStationOptions(stationsData);
           }
@@ -150,14 +151,7 @@ export default function Page(): React.JSX.Element {
           ))}
         </select>
       </Grid>
-      <Grid container xs={12}>
-        <Tabs value={selectedTab} onChange={handleChangeTab} indicatorColor="secondary">
-          {chartData.map((station, index) => (
-            <Tab key={index} label={station.stationId} />
-          ))}
-        </Tabs>
-      </Grid>
-      <Grid container lg={4} spacing={2} direction={'column'}>
+      <Grid container lg={4} spacing={2} direction={'column'} xs={12}>
         <Grid lg={12} xs={12}>
           <Metrics
             dataType="Temperatura"
@@ -182,7 +176,7 @@ export default function Page(): React.JSX.Element {
           <Metrics
             dataType="Radación"
             currentData={rtData?.radiation}
-            value="V"
+            value="W/m2"
             max={maxData?.radiation}
             min={minData?.radiation}
             icon={<Radioactive size={32} />}
@@ -190,6 +184,15 @@ export default function Page(): React.JSX.Element {
         </Grid>
       </Grid>
       <Grid container lg={8} spacing={2}>
+      <Grid lg={12} xs={12}>
+          <MetricsCharts
+            chartSeries={[{ name: 'Temperatura', data: chartData[selectedTab]?.chartsData?.temperature }]}
+            sx={{ height: '100%' }}
+            title="Temperatura"
+            metric="°C"
+            color="#3D84FF"
+          />
+        </Grid>
         <Grid lg={12} xs={12}>
           <MetricsCharts
             chartSeries={[{ name: 'Humedad', data: chartData[selectedTab]?.chartsData?.humidity }]}

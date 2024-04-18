@@ -25,7 +25,7 @@ export function DownloadDocs({ station }: { station: string }): React.JSX.Elemen
 
   const handleSearch = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/data/date', {
+      const response = await axios.post('http://3.221.32.128/data/date', {
         stationId: station,
         startDate: startDate,
         endDate: endDate
