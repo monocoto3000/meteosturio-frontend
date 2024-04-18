@@ -210,7 +210,7 @@ export default function Page(): React.JSX.Element {
         </Grid>
       </Grid>
       <Grid lg={12} xs={12}>
-        <DownloadDocs />
+        <DownloadDocs station={selectedStation}/>
       </Grid>
     </Grid>
   );
