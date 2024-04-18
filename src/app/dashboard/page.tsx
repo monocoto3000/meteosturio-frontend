@@ -31,34 +31,6 @@ export default function Page(): React.JSX.Element {
 
   const token = localStorage.getItem('token');
 
-  useEffect(() => {
-    axios
-      .post(baseURL_max, { stationId: selectedStation })
-      .then((response) => {
-        if (response != null) {
-          console.log('max', response.data);
-          setMaxData(response.data);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, [selectedStation]);
-
-  useEffect(() => {
-    axios
-      .post(baseURL_min, { stationId: selectedStation })
-      .then((response) => {
-        if (response != null) {
-          console.log('min', response.data);
-          setMinData(response.data);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, [selectedStation]);
-
   const socket = io('http://3.212.10.41');
 
   useEffect(() => {
@@ -69,20 +41,31 @@ export default function Page(): React.JSX.Element {
         updateLocalData(data);
       }
     });
+  }, [selectedStation]);
 
-    socket.on('averages', (data) => {
-      axios
-        .post(baseURL_data, { stationId: selectedStation })
-        .then((response) => {
-          if (response != null) {
-            console.log('data from API', response.data);
-            setChartData(response.data);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const chart = await axios.post(baseURL_data, { stationId: selectedStation });
+        const max = await axios.post(baseURL_max, { stationId: selectedStation });
+        const min = await axios.post(baseURL_min, { stationId: selectedStation });
+        if (chart.data && min.data && max.data) {
+          console.log("chart", chart.data)
+          setChartData(chart.data);
+
+          setMaxData(max.data);
+          console.log("max", max.data)
+
+          setMinData(min.data);
+          console.log("min", min.data)
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
   }, [selectedStation]);
 
   const updateLocalData = (newData) => {
@@ -186,7 +169,7 @@ export default function Page(): React.JSX.Element {
       <Grid container lg={8} spacing={2}>
       <Grid lg={12} xs={12}>
           <MetricsCharts
-            chartSeries={[{ name: 'Temperatura', data: chartData[selectedTab]?.chartsData?.temperature }]}
+            chartSeries={[{ name: 'Temperatura', data: chartData.map((data) => data.temperature)}]}
             sx={{ height: '100%' }}
             title="Temperatura"
             metric="°C"
@@ -195,7 +178,7 @@ export default function Page(): React.JSX.Element {
         </Grid>
         <Grid lg={12} xs={12}>
           <MetricsCharts
-            chartSeries={[{ name: 'Humedad', data: chartData[selectedTab]?.chartsData?.humidity }]}
+            chartSeries={[{ name: 'Humedad', data: chartData.map((data) => data.humidity) }]}
             sx={{ height: '100%' }}
             title="Humedad"
             metric="%"
@@ -204,7 +187,7 @@ export default function Page(): React.JSX.Element {
         </Grid>
         <Grid lg={12} xs={12}>
           <MetricsCharts
-            chartSeries={[{ name: 'Radiación', data: chartData[selectedTab]?.chartsData?.radiation }]}
+            chartSeries={[{ name: 'Radiación', data: chartData.map((data) => data.radiation) }]}
             sx={{ height: '100%' }}
             title="Radiación"
             metric="V"
